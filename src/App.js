@@ -1,7 +1,19 @@
 import React, { Component } from 'react';
+import GeoJsonLoader from './GeoJsonLoader';
 import './App.css';
 
 class App extends Component {
+
+    constructor(props) {
+        super(props);
+
+        this.state = {
+            countries: [],
+        };
+
+        this.handleJsonLoad = this.handleJsonLoad.bind(this);
+    }
+
     render() {
         return (
             <div className="App">
@@ -9,29 +21,63 @@ class App extends Component {
                     <h1 className="App-title">Country Shape generator</h1>
                 </header>
                 <div className="App-intro">
-                    <label>
-                        Load a GeoJsonFile with countries info:
-
-                        <input
-                            accept=".geojson, .json"
-                            type="file"
-                            onChange={
-                                (event) => {
-                                    const reader = new FileReader();
-                                    reader.onload = onReaderLoad;
-                                    reader.readAsText(event.target.files[0]);
-
-                                    function onReaderLoad(event2){
-                                        var obj = JSON.parse(event2.target.result);
-                                        console.log(obj);
-                                    }
-                                }
-                            }/>
-                    </label>
+                    <GeoJsonLoader onLoad={ this.handleJsonLoad }/>
+                    <div>
+                    {
+                        !!this.state.countries.length &&
+                        this.state.countries.map((country) =>
+                            <div key={country.country_code}>
+                                { country.country_code } ({ country.properties.NAME })
+                            </div>
+                        )
+                    }
+                    </div>
                 </div>
             </div>
         );
     }
+
+    handleJsonLoad(geojson) {
+        // TODO check geojson is correct
+        this.setState({
+            countries: processCountries(geojson.features),
+        })
+    }
+
+}
+
+function processCountries(countries) {
+    return countries
+        .map(country => Object.assign({}, country, { country_code: getCountryCode(country) }))
+        .filter(country => country.country_code !== null)
+        .filter(country => !shouldRemoveCountry(country));
+}
+
+function getCountryCode(country) {
+    if(country.properties.ISO_A2 !== '-99') {
+        return country.properties.ISO_A2;
+    }
+    if(country.properties.FIPS_10_ !== '-99') {
+        return country.properties.FIPS_10_;
+    }
+    if(country.properties.WB_A2 !== '-99') {
+        return country.properties.WB_A2;
+    }
+    return null;
+}
+
+function shouldRemoveCountry(country) {
+    const TYPES_TO_REMOVE = ['Dependency', 'Indeterminate'];
+    const countryType = country.properties.TYPE;
+    return TYPES_TO_REMOVE.includes(countryType);
+
+    // All types:
+    // Country
+    // Dependency
+    // Disputed
+    // Indeterminate
+    // Lease
+    // Sovereign country
 }
 
 export default App;
