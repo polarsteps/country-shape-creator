@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import geojson2svg from 'geojson-to-svg';
 import { getBoundaries } from '../utils/geojsonUtils';
+import merc from 'mercator-projection';
+
 import './style.css';
 
 class CountrySvg extends Component {
@@ -20,7 +22,8 @@ class CountrySvg extends Component {
         const svg = geojson2svg()
             .styles({ 'MultiPolygon' : { fill: 'black', stroke: 'none' } })
             .projection((coord) => {
-                return [coord[0], -coord[1]];
+                const projected = merc.fromLatLngToPoint({lat: coord[1], lng: coord[0]});
+                return [projected.x, projected.y];
             })
             .data(this.props.countryInfo)
             .render();
