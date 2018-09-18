@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { getBoundaries, getLatLonFromString } from '../utils/geojsonUtils';
 import CountrySvg from '../CountrySvg';
 
 import './style.css';
@@ -10,19 +9,14 @@ class Country extends Component {
     constructor(props) {
         super(props);
 
-        this.updateLatLon = this.updateLatLon.bind(this);
+        this.updateLat = this.updateLat.bind(this);
+        this.updateLon = this.updateLon.bind(this);
 
         this.state = {
-            originalBounds: null,
             latLonToShow: '',
-            latLon: null
+            lat: '40.415363',
+            lon: '-3.707398'
         };
-    }
-
-    componentDidMount() {
-        this.setState({
-            originalBounds: getBoundaries(this.props.countryInfo),
-        });
     }
 
     render() {
@@ -34,18 +28,34 @@ class Country extends Component {
                 <div>
                     <CountrySvg
                         countryInfo={this.props.countryInfo}
-                        latLonToProject={this.state.latLon}
+                        latLonToProject={ {
+                            lat: parseFloat(this.state.lat),
+                            lon: parseFloat(this.state.lon),
+                        } }
                     />
                 </div>
-                <input value={ this.state.latLonToShow } onChange={ this.updateLatLon } />
+                <label>
+                    Lat:
+                    <input value={ this.state.lat } onChange={ this.updateLat } />
+                </label>
+
+                <label>
+                    Lon:
+                    <input value={ this.state.lon } onChange={ this.updateLon } />
+                </label>
             </div>
         );
     }
 
-    updateLatLon(event) {
+    updateLat(event) {
         this.setState({
-            latLonToShow: event.target.value,
-            latLon: getLatLonFromString(event.target.value)
+            lat: event.target.value,
+        });
+    }
+
+    updateLon(event) {
+        this.setState({
+            lon: event.target.value,
         });
     }
 }

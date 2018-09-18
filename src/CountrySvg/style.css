@@ -6,3 +6,26 @@
     .CountrySvg svg {
         background-color: #aaa;
     }
+
+    .CountrySvg-inner {
+        position: relative;
+    }
+        .CountrySvg-dot {
+            position: absolute;
+            color: white;
+            font-size: 10px;
+        }
+
+        .CountrySvg-dot::before {
+            content: '';
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 4px;
+            width: 4px;
+            border-radius: 50%;
+            margin-left: -2px;
+            margin-top: -2px;
+            background: red;
+        }
