@@ -4,7 +4,7 @@ import './style.css';
 
 const GeoJsonLoader = (props) => {
     return (
-        <label>
+        <label className="GeoJsonLoader">
             Load a GeoJsonFile with countries info:
 
             <input

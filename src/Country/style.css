@@ -1,0 +1,8 @@
+.Country {
+    height: 200px;
+    width: 200px;
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    background-color: #e2e2e2;
+}

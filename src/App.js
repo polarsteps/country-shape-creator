@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import GeoJsonLoader from './GeoJsonLoader';
+import Country from './Country';
 import './App.css';
 
 class App extends Component {
@@ -25,11 +26,17 @@ class App extends Component {
                     <div>
                     {
                         !!this.state.countries.length &&
-                        this.state.countries.map((country) =>
-                            <div key={country.country_code}>
-                                { country.country_code } ({ country.properties.NAME })
-                            </div>
-                        )
+                        <div className="App-countries">
+                            {
+                                this.state.countries.map((country) =>
+                                    <Country
+                                        key={country.country_code}
+                                        countryInfo={country}
+                                        ></Country>
+                                )
+                            }
+                        </div>
+
                     }
                     </div>
                 </div>
