@@ -1,8 +1,13 @@
 .Country {
     width: 100%;
-    max-width: 400px;
     margin: 5px;
     padding: 5px;
     border-radius: 5px;
-    background-color: #e2e2e2;
+    overflow: hidden;
+}
+
+.Country-title {
+    border-bottom: 1px solid #888;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }

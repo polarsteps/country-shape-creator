@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import GeoJsonLoader from './GeoJsonLoader';
 import Country from './Country';
-import { sortBy } from 'lodash';
+import JSZip from 'jszip';
+import { getCountryName, processCountries } from './utils/geojsonUtils';
 import './App.css';
 
 class App extends Component {
@@ -11,11 +12,12 @@ class App extends Component {
 
         this.state = {
             countries: [],
-            filter: '',
+            filter: 'spain',
         };
 
         this.handleJsonLoad = this.handleJsonLoad.bind(this);
         this.filterChanged = this.filterChanged.bind(this);
+        this.downloadAll = this.downloadAll.bind(this);
     }
 
     render() {
@@ -26,6 +28,10 @@ class App extends Component {
                 </header>
                 <div className="App-intro">
                     <GeoJsonLoader onLoad={ this.handleJsonLoad }/>
+                    <div>
+                        <button onClick={ this.downloadAll }>Download all</button>
+                    </div>
+
                     <div>
                     {
                         !!this.state.countries.length &&
@@ -69,6 +75,17 @@ class App extends Component {
         });
     }
 
+    downloadAll() {
+        const zip = new JSZip();
+        zip.file("hello.txt", "Hello World\n");
+        zip.generateAsync({type:"base64"})
+            .then((base64) => {
+                window.location = "data:application/zip;base64," + base64;
+            }, (err) => {
+                console.warn(err);
+            });
+    }
+
 }
 
 function countryContainsFilter(country, filter) {
@@ -77,54 +94,6 @@ function countryContainsFilter(country, filter) {
     }
     const countryName = getCountryName(country);
     return countryName.toLowerCase().indexOf(filter.toLowerCase()) !== -1;
-}
-
-function processCountries(countries) {
-    const unsorted = countries
-        .map(country => Object.assign({}, country, { country_code: getCountryCode(country) }))
-        .filter(country => country.country_code !== null)
-        .filter(country => !shouldRemoveCountry(country));
-    return sortBy(unsorted, country => getCountryName(country).toLowerCase() );
-}
-
-function getCountryName(country) {
-    return country.properties.NAME || country.properties.name;
-}
-
-function getCountryCode(country) {
-    if(country.properties.ISO_A2 && country.properties.ISO_A2 !== '-99') {
-        return country.properties.ISO_A2;
-    }
-    if(country.properties.FIPS_10_ && country.properties.FIPS_10_ !== '-99') {
-        return country.properties.FIPS_10_;
-    }
-    if(country.properties.WB_A2 && country.properties.WB_A2 !== '-99') {
-        return country.properties.WB_A2;
-    }
-    if(country.properties.iso_a2 && country.properties.iso_a2 !== '-99') {
-        return country.properties.iso_a2;
-    }
-    if(country.properties.fips_10_ && country.properties.fips_10_ !== '-99') {
-        return country.properties.fips_10_;
-    }
-    if(country.properties.wb_a2 && country.properties.wb_a2 !== '-99') {
-        return country.properties.wb_a2;
-    }
-    return null;
-}
-
-function shouldRemoveCountry(country) {
-    const TYPES_TO_REMOVE = ['Dependency', 'Indeterminate'];
-    const countryType = country.properties.TYPE || country.properties.type;
-    return TYPES_TO_REMOVE.includes(countryType);
-
-    // All types:
-    // Country
-    // Dependency
-    // Disputed
-    // Indeterminate
-    // Lease
-    // Sovereign country
 }
 
 export default App;

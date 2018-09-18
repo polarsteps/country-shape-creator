@@ -1,0 +1,8 @@
+.CountrySvg {
+    height: 400px;
+    width: 400px;
+    background-color: #e2e2e2;
+}
+    .CountrySvg svg {
+        background-color: #aaa;
+    }
