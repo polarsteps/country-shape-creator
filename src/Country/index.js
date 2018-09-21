@@ -28,6 +28,7 @@ class Country extends Component {
                 <div>
                     <CountrySvg
                         countryInfo={this.props.countryInfo}
+                        allowSelectArea={true}
                         latLonToProject={ {
                             lat: parseFloat(this.state.lat),
                             lon: parseFloat(this.state.lon),

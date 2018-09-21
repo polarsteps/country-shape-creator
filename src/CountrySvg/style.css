@@ -10,6 +10,17 @@
     .CountrySvg-inner {
         position: relative;
     }
+        .CountrySvg-areaSelector {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+            .CountrySvg-areaSelector-inner {
+                height: 400px;
+                width: 400px;
+            }
         .CountrySvg-dot {
             position: absolute;
             color: white;

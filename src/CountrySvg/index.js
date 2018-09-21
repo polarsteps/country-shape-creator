@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import geojson2svg from 'geojson-to-svg';
-// import { getBoundaries } from '../utils/geojsonUtils';
+import RegionSelect from 'react-region-select';
 import merc from 'mercator-projection';
 
 import './style.css';
@@ -16,11 +16,15 @@ class CountrySvg extends Component {
             svg: null
         };
         this.svgRef = React.createRef();
+        this.innerContainerRef = React.createRef();
         this.initSvg = this.initSvg.bind(this);
+        this.initRegion = this.initRegion.bind(this);
+        this.onRegionChange = this.onRegionChange.bind(this);
     }
 
     componentDidMount() {
         setTimeout(this.initSvg);
+        setTimeout(this.initRegion);
     }
 
     render() {
@@ -30,7 +34,20 @@ class CountrySvg extends Component {
                     this.state.loading &&
                     <div> Loading... </div>
                 }
-                <div className='CountrySvg-inner'>
+                <div className='CountrySvg-inner'
+                     ref={this.innerContainerRef}>
+                    {
+                        this.props.allowSelectArea && this.state.regionReady &&
+                        <div className='CountrySvg-areaSelector'>
+                            <RegionSelect
+                                maxRegions={1}
+                                regions={ this.state.regions }
+                                constraint={ true }
+                                onChange={ this.onRegionChange }>
+                                <div className='CountrySvg-areaSelector-inner'></div>
+                            </RegionSelect>
+                        </div>
+                    }
                     {
                         this.state.svg &&
                         <div dangerouslySetInnerHTML={this.state.svg}
@@ -62,6 +79,33 @@ class CountrySvg extends Component {
                 __html: svgElement.outerHTML
             }
         });
+    }
+
+    initRegion() {
+        const bounds = this.innerContainerRef.current.getBoundingClientRect();
+        const initialRegion = {
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 100,
+            data: {},
+        };
+
+        this.setState({
+            regions: [ initialRegion ],
+            regionReady: true,
+        });
+    }
+
+    onRegionChange(changes) {
+        const regionChange = changes[0];
+        if(regionChange.isChanging) {
+            this.setState({
+                regions: [{
+                    ...regionChange
+                }],
+            });
+        }
     }
 
     canShowDot() {
@@ -147,6 +191,7 @@ function makeSvgElementSquare(element) {
 CountrySvg.propTypes = {
     countryInfo: PropTypes.object.isRequired,
     latLonToProject: PropTypes.object,
+    allowSelectArea: PropTypes.bool,
 };
 
 export default CountrySvg;
