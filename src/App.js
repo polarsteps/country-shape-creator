@@ -13,7 +13,7 @@ class App extends Component {
 
         this.state = {
             countries: [],
-            filter: 'spain',
+            filter: '',
         };
 
         this.handleJsonLoad = this.handleJsonLoad.bind(this);
