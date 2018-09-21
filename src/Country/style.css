@@ -11,3 +11,15 @@
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+.Country-maps {
+    display: flex;
+}
+
+    .Country-maps .CountrySvg {
+        margin-left: 10px;
+    }
+
+    .Country-maps .CountrySvg:first-child {
+        margin-left: 0;
+    }

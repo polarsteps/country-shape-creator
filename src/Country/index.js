@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import CountrySvg from '../CountrySvg';
+import { getLimitedViewBoxFromSelection } from '../utils/svgUtils';
 
 import './style.css';
 
@@ -11,6 +12,8 @@ class Country extends Component {
 
         this.updateLat = this.updateLat.bind(this);
         this.updateLon = this.updateLon.bind(this);
+        this.handleInitSvgBoundaries = this.handleInitSvgBoundaries.bind(this);
+        this.handleChangeAreaSelection = this.handleChangeAreaSelection.bind(this);
 
         this.state = {
             latLonToShow: '',
@@ -25,7 +28,7 @@ class Country extends Component {
                 <div className='Country-title'>
                     { this.props.countryInfo.properties.NAME }
                 </div>
-                <div>
+                <div className='Country-maps'>
                     <CountrySvg
                         countryInfo={this.props.countryInfo}
                         allowSelectArea={true}
@@ -33,7 +36,21 @@ class Country extends Component {
                             lat: parseFloat(this.state.lat),
                             lon: parseFloat(this.state.lon),
                         } }
+                        onInitSvgBoundaries={ this.handleInitSvgBoundaries }
+                        onChangeAreaSelection={ this.handleChangeAreaSelection }
                     />
+                    {
+                        this.state.limitedViewBox &&
+                        <CountrySvg
+                            countryInfo={this.props.countryInfo}
+                            latLonToProject={ {
+                                lat: parseFloat(this.state.lat),
+                                lon: parseFloat(this.state.lon),
+                            } }
+                            limitedViewBox={ this.state.limitedViewBox }
+                            onChangeSvgDisplayed={ this.props.onSvgChanged }
+                        />
+                    }
                 </div>
                 <label>
                     Lat:
@@ -59,11 +76,25 @@ class Country extends Component {
             lon: event.target.value,
         });
     }
+
+    handleInitSvgBoundaries(newBounds) {
+        this.setState({
+            svgBounds: newBounds,
+        });
+    }
+
+    handleChangeAreaSelection(newArea) {
+        const limitedViewBox = getLimitedViewBoxFromSelection(this.state.svgBounds, newArea);
+        this.setState({
+            limitedViewBox,
+        });
+    }
+
 }
 
-
 Country.propTypes = {
-    countryInfo: PropTypes.object.isRequired
+    countryInfo: PropTypes.object.isRequired,
+    onSvgChanged: PropTypes.func,
 };
 
 export default Country;

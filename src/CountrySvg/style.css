@@ -1,6 +1,8 @@
 .CountrySvg {
-    height: 400px;
-    width: 400px;
+    height: 700px;
+    width: 700px;
+    min-height: 700px;
+    min-width: 700px;
     background-color: #e2e2e2;
 }
     .CountrySvg svg {
@@ -18,8 +20,8 @@
             bottom: 0;
         }
             .CountrySvg-areaSelector-inner {
-                height: 400px;
-                width: 400px;
+                height: 700px;
+                width: 700px;
             }
         .CountrySvg-dot {
             position: absolute;

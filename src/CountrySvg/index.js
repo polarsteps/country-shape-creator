@@ -3,7 +3,14 @@ import PropTypes from 'prop-types';
 import geojson2svg from 'geojson-to-svg';
 import RegionSelect from 'react-region-select';
 import merc from 'mercator-projection';
-
+import {
+    getViewBoxFromElement,
+    getSvgBoundaries,
+    makeSvgElementSquare,
+    updateSvgElementViewBox,
+    getLatLonBoundsFromViewBox,
+} from '../utils/svgUtils';
+import { getRelativePosition } from '../utils/proportions';
 import './style.css';
 
 class CountrySvg extends Component {
@@ -16,15 +23,22 @@ class CountrySvg extends Component {
             svg: null
         };
         this.svgRef = React.createRef();
-        this.innerContainerRef = React.createRef();
         this.initSvg = this.initSvg.bind(this);
         this.initRegion = this.initRegion.bind(this);
         this.onRegionChange = this.onRegionChange.bind(this);
     }
 
     componentDidMount() {
-        setTimeout(this.initSvg);
-        setTimeout(this.initRegion);
+        this.initSvgTimeout = setTimeout(this.initSvg);
+    }
+
+    static getDerivedStateFromProps(props, state) {
+        if(props.limitedViewBox && state.lastUsedViewBox && (props.limitedViewBox.toString() !== state.lastUsedViewBox.toString())) {
+            const newState = getStateFromSvgAndProps(state.svgElement, props);
+            notifySvgChanged({ ...state, ...newState}, props);
+            return newState;
+        }
+        return {};
     }
 
     render() {
@@ -34,8 +48,7 @@ class CountrySvg extends Component {
                     this.state.loading &&
                     <div> Loading... </div>
                 }
-                <div className='CountrySvg-inner'
-                     ref={this.innerContainerRef}>
+                <div className='CountrySvg-inner'>
                     {
                         this.props.allowSelectArea && this.state.regionReady &&
                         <div className='CountrySvg-areaSelector'>
@@ -70,19 +83,27 @@ class CountrySvg extends Component {
         );
     }
 
+    componentWillUnmount() {
+        if(this.initSvgTimeout) {
+            clearTimeout(this.initSvgTimeout);
+            this.initSvgTimeout = null;
+        }
+    }
+
     initSvg() {
-        const svgElement = this.getSvgElement();
-        makeSvgElementSquare(svgElement);
-        this.setState({
-            loading: false,
-            svg: {
-                __html: svgElement.outerHTML
-            }
-        });
+        this.initSvgTimeout = null;
+        const svgElement = this.getNewSvgElement();
+        this.setState(getStateFromSvgAndProps(svgElement, this.props));
+        notifySvgChanged(this.state, this.props);
+
+        if(this.props.onInitSvgBoundaries) {
+            this.props.onInitSvgBoundaries(getViewBoxFromElement(svgElement));
+        }
+
+        this.initRegion();
     }
 
     initRegion() {
-        const bounds = this.innerContainerRef.current.getBoundingClientRect();
         const initialRegion = {
             x: 0,
             y: 0,
@@ -94,7 +115,12 @@ class CountrySvg extends Component {
         this.setState({
             regions: [ initialRegion ],
             regionReady: true,
+            loading: false,
         });
+
+        if(this.props.onChangeAreaSelection) {
+            this.props.onChangeAreaSelection({ ...initialRegion });
+        }
     }
 
     onRegionChange(changes) {
@@ -105,6 +131,9 @@ class CountrySvg extends Component {
                     ...regionChange
                 }],
             });
+            if(this.props.onChangeAreaSelection) {
+                this.props.onChangeAreaSelection({ ...regionChange });
+            }
         }
     }
 
@@ -114,7 +143,7 @@ class CountrySvg extends Component {
     }
 
     getDotStyle() {
-        const pixelInfo = project(
+        const pixelInfo = projectLatLonIntoArea(
             this.props.latLonToProject,
             getSvgBoundaries(this.svgRef.current.querySelector('svg')),
             this.svgRef.current.getBoundingClientRect(),
@@ -125,7 +154,7 @@ class CountrySvg extends Component {
         };
     }
 
-    getSvgElement() {
+    getNewSvgElement() {
         const svg = geojson2svg()
             .styles({ 'MultiPolygon' : { fill: 'black', stroke: 'none' } })
             .projection((coord) => {
@@ -138,9 +167,24 @@ class CountrySvg extends Component {
         const parser = new DOMParser();
         return parser.parseFromString(svg, "image/svg+xml").querySelector('svg');
     }
+
 }
 
-function project(latlon, svgBoundaries, boundingBox) {
+function getStateFromSvgAndProps(svgElement, props) {
+    if(props.limitedViewBox) {
+        updateSvgElementViewBox(svgElement, props.limitedViewBox);
+    }
+    const lastUsedViewBox = makeSvgElementSquare(svgElement);
+    return {
+        svg: {
+            __html: svgElement.outerHTML
+        },
+        svgElement,
+        lastUsedViewBox
+    };
+}
+
+function projectLatLonIntoArea(latlon, svgBoundaries, boundingBox) {
     const { minX, minY, maxX, maxY } = svgBoundaries;
     const {x, y} = merc.fromLatLngToPoint({lat: latlon.lat, lng: latlon.lon});
     const relativeX = getRelativePosition(x, minX, maxX);
@@ -149,49 +193,27 @@ function project(latlon, svgBoundaries, boundingBox) {
         x: relativeX * boundingBox.width,
         y: relativeY * boundingBox.height,
     };
-
 }
 
-function getSvgBoundaries(element) {
-    const viewBox = element.getAttribute('viewBox');
-    const [minX, minY, width, height] = viewBox.split(' ').map(string => parseFloat(string));
-
-    return {
-        minX,
-        minY,
-        maxX: minX + width,
-        maxY: minY + height
-    };
-}
-
-function getRelativePosition(x, min, max) {
-    return (x - min) / (max - min);
-}
-
-function makeSvgElementSquare(element) {
-
-    const viewBox = element.getAttribute('viewBox');
-    let [minX, minY, width, height] = viewBox.split(' ').map(string => parseFloat(string));
-
-    if(width < height) {
-        const diff = height - width;
-        minX = minX - (diff / 2);
-        width = height;
-    } else {
-        const diff = width - height;
-        minY = minY - (diff / 2);
-        height = width;
+function notifySvgChanged(state, props) {
+    if(props.onChangeSvgDisplayed) {
+        props.onChangeSvgDisplayed({
+            svg: state.svg.__html,
+            viewBox: state.lastUsedViewBox,
+            latLonBounds: getLatLonBoundsFromViewBox(state.lastUsedViewBox),
+            countryCode: props.countryInfo.country_code,
+        });
     }
-
-    element.setAttribute('viewBox', `${minX} ${minY} ${width} ${height}`);
-
-    return element;
 }
 
 CountrySvg.propTypes = {
     countryInfo: PropTypes.object.isRequired,
     latLonToProject: PropTypes.object,
     allowSelectArea: PropTypes.bool,
+    onInitSvgBoundaries: PropTypes.func,
+    onChangeAreaSelection: PropTypes.func,
+    limitedViewBox: PropTypes.array,
+    onChangeSvgDisplayed: PropTypes.func,
 };
 
 export default CountrySvg;

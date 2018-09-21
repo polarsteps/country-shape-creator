@@ -20,3 +20,18 @@
     flex-wrap: wrap;
     justify-content: center;
 }
+
+.App-tools {
+    display: flex;
+    padding:
+}
+
+.App-download {
+    margin: 0 20px;
+    border: 0;
+    outline: 0;
+    padding: 10px 20px;
+    border-radius: 50px;
+    color: white;
+    background-color: #de2b52;
+}

@@ -3,6 +3,7 @@ import GeoJsonLoader from './GeoJsonLoader';
 import Country from './Country';
 import JSZip from 'jszip';
 import { getCountryName, processCountries } from './utils/geojsonUtils';
+import { saveAs } from 'file-saver/FileSaver';
 import './App.css';
 
 class App extends Component {
@@ -12,12 +13,13 @@ class App extends Component {
 
         this.state = {
             countries: [],
-            filter: 'spain',
+            filter: '',
         };
 
         this.handleJsonLoad = this.handleJsonLoad.bind(this);
         this.filterChanged = this.filterChanged.bind(this);
         this.downloadAll = this.downloadAll.bind(this);
+        this.handleSvgChanged = this.handleSvgChanged.bind(this);
     }
 
     render() {
@@ -29,18 +31,18 @@ class App extends Component {
                 <div className="App-intro">
                     <GeoJsonLoader onLoad={ this.handleJsonLoad }/>
                     <div>
-                        <button onClick={ this.downloadAll }>Download all</button>
-                    </div>
-
-                    <div>
                     {
                         !!this.state.countries.length &&
                         <React.Fragment>
-                            <div>
+                            <div className="App-tools">
                                 <label>
                                     Filter by:
                                     <input value={ this.state.filter } onChange={ this.filterChanged } />
                                 </label>
+
+                                <div>
+                                    <button className="App-download" onClick={ this.downloadAll }>Download all</button>
+                                </div>
                             </div>
                             <div className="App-countries">
                                 {
@@ -50,6 +52,7 @@ class App extends Component {
                                             <Country
                                                 key={country.country_code}
                                                 countryInfo={country}
+                                                onSvgChanged={ this.handleSvgChanged }
                                                 ></Country>
                                         )
                                 }
@@ -76,16 +79,39 @@ class App extends Component {
     }
 
     downloadAll() {
+        const svgsInfo = Object.values(this.allSvgs);
+        const boundsInfo = getBoundsInfo(svgsInfo);
         const zip = new JSZip();
-        zip.file("hello.txt", "Hello World\n");
-        zip.generateAsync({type:"base64"})
-            .then((base64) => {
-                window.location = "data:application/zip;base64," + base64;
+        zip.file('bounds.json', boundsInfo);
+        svgsInfo.forEach((svgInfo) => {
+            zip.file(`${svgInfo.countryCode}.svg`, svgInfo.svg);
+        });
+        zip.generateAsync({type:"blob"})
+            .then((blob) => {
+                saveAs(blob, "svgs_and_bounds.zip");
             }, (err) => {
                 console.warn(err);
             });
     }
 
+    handleSvgChanged(changeInfo) {
+        this.allSvgs = this.allSvgs || {};
+        this.allSvgs[changeInfo.countryCode] = changeInfo;
+    }
+
+}
+
+function getBoundsInfo(svgsInfo) {
+    const json = {};
+
+    svgsInfo.forEach((countryInfo) => {
+        json[countryInfo.countryCode] = {
+            latLonBounds: countryInfo.latLonBounds,
+            viewBox: countryInfo.viewBox
+        };
+    });
+
+    return JSON.stringify(json, undefined, 2);
 }
 
 function countryContainsFilter(country, filter) {
