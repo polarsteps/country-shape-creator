@@ -28,49 +28,56 @@ class App extends Component {
         return (
             <div className="App">
                 <header className="App-header">
-                    <h1 className="App-title">Country Shape generator</h1>
-                </header>
-                <div className="App-intro">
-                    {
-                        !this.state.countries.length &&
-                        <JsonLoader onLoad={ this.handleJsonLoad } label={"Load a GeoJsonFile with countries info: "}/>
-                    }
-                    <div>
+                    <h1 className="App-title">Country Shape Generator</h1>
+
                     {
                         !!this.state.countries.length &&
-                        <React.Fragment>
-                            <div className="App-tools">
-                                <button className="App-reset button" onClick={ this.reset }>Reset and start again</button>
-
-                                <label>
-                                    Filter by:
-                                    <input value={ this.state.filter } onChange={ this.filterChanged } />
-                                </label>
-
-                                <div>
-                                    <JsonLoader onLoad={ this.handleBoundsJsonLoad } label={"Load custom bounds: "}/>
-                                </div>
-
-                                <button className="App-download button" onClick={ this.downloadAll }>Download all</button>
-                            </div>
-                            <div className="App-countries">
-                                {
-                                    this.state.countries
-                                        .filter(country => countryContainsFilter(country, this.state.filter))
-                                        .map((country) =>
-                                            <Country
-                                                key={country.country_code}
-                                                countryInfo={country}
-                                                predefinedBounds={ this.getPredefinedBoundsForCountry(country.country_code) }
-                                                onSvgChanged={ this.handleSvgChanged }
-                                                ></Country>
-                                        )
-                                }
-                            </div>
-                        </React.Fragment>
+                        <button className="App-reset button" onClick={ this.reset }>Reset and start again</button>
                     }
+
+                    {
+                        !!this.state.countries.length &&
+                        <button className="App-download button" onClick={ this.downloadAll }>Download all</button>
+                    }
+
+                </header>
+                {
+                    !this.state.countries.length &&
+                    <div className="App-intro">
+                        <JsonLoader onLoad={ this.handleJsonLoad } label={"Load a GeoJsonFile with countries info: "}/>
                     </div>
-                </div>
+                }
+                {
+                    !!this.state.countries.length &&
+                    <React.Fragment>
+                        <div className="App-tools">
+
+                            <div>
+                                <JsonLoader onLoad={ this.handleBoundsJsonLoad } label={"Load custom bounds: "}/>
+                            </div>
+
+                            <label>
+                                Filter by:
+                                <input className="App-tools-filter" value={ this.state.filter } onChange={ this.filterChanged } />
+                            </label>
+
+                        </div>
+                        <div className="App-countries">
+                            {
+                                this.state.countries
+                                    .filter(country => countryContainsFilter(country, this.state.filter))
+                                    .map((country) =>
+                                        <Country
+                                            key={country.country_code}
+                                            countryInfo={country}
+                                            predefinedBounds={ this.getPredefinedBoundsForCountry(country.country_code) }
+                                            onSvgChanged={ this.handleSvgChanged }
+                                            ></Country>
+                                    )
+                            }
+                        </div>
+                    </React.Fragment>
+                }
             </div>
         );
     }

@@ -1,10 +1,10 @@
-.App {
-  text-align: center;
-}
 .App-header {
-  background-color: #222;
-  padding: 20px;
-  color: white;
+    background-color: #002e3d;
+    padding: 20px;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
 }
 
 .App-title {
@@ -13,6 +13,13 @@
 
 .App-intro {
   font-size: large;
+  text-align: left;
+  padding-left: 20px;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
 }
 
 .App-countries {
@@ -22,22 +29,35 @@
 }
 
 .App-tools {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     padding-top: 20px;
+    text-align: left;
+    padding-left: 20px;
 }
-
-.App-download {
-    margin: 0 20px;
-}
+    .App-tools-filter {
+        margin-left: 5px;
+        border-radius: 4px;
+        height: 20px;
+        line-height: 20px;
+        outline: 0;
+        border: 1px solid #8a99ad;
+        padding: 0 5px;
+    }
 
 button {
-    margin: 0 20px;
+    margin: 0 10px;
     border: 0;
     outline: 0;
     padding: 10px 20px;
     border-radius: 50px;
     color: white;
     background-color: #de2b52;
+}
+
+.App-reset {
+    margin-left: auto;
+    background-color: #8a99ad;
+}
+
+.App-download {
+    margin: 0 10px;
 }
