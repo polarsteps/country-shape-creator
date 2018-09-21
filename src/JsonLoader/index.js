@@ -2,10 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './style.css';
 
-const GeoJsonLoader = (props) => {
+const JsonLoader = (props) => {
     return (
-        <label className="GeoJsonLoader">
-            Load a GeoJsonFile with countries info:
+        <label className="JsonLoader">
+            { props.label }
 
             <input
                 accept=".geojson, .json"
@@ -27,8 +27,9 @@ const GeoJsonLoader = (props) => {
     );
 }
 
-GeoJsonLoader.propTypes = {
+JsonLoader.propTypes = {
+    label: PropTypes.string,
     onLoad: PropTypes.func.isRequired
 };
 
-export default GeoJsonLoader;
+export default JsonLoader;

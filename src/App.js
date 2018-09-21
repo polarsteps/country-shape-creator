@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import GeoJsonLoader from './GeoJsonLoader';
+import JsonLoader from './JsonLoader';
 import Country from './Country';
 import JSZip from 'jszip';
 import { getCountryName, processCountries } from './utils/geojsonUtils';
@@ -13,7 +13,7 @@ class App extends Component {
 
         this.state = {
             countries: [],
-            filter: '',
+            filter: 'spain',
         };
 
         this.handleJsonLoad = this.handleJsonLoad.bind(this);
@@ -21,6 +21,7 @@ class App extends Component {
         this.downloadAll = this.downloadAll.bind(this);
         this.handleSvgChanged = this.handleSvgChanged.bind(this);
         this.reset = this.reset.bind(this);
+        this.handleBoundsJsonLoad = this.handleBoundsJsonLoad.bind(this);
     }
 
     render() {
@@ -32,7 +33,7 @@ class App extends Component {
                 <div className="App-intro">
                     {
                         !this.state.countries.length &&
-                        <GeoJsonLoader onLoad={ this.handleJsonLoad }/>
+                        <JsonLoader onLoad={ this.handleJsonLoad } label={"Load a GeoJsonFile with countries info: "}/>
                     }
                     <div>
                     {
@@ -46,6 +47,10 @@ class App extends Component {
                                     <input value={ this.state.filter } onChange={ this.filterChanged } />
                                 </label>
 
+                                <div>
+                                    <JsonLoader onLoad={ this.handleBoundsJsonLoad } label={"Load custom bounds: "}/>
+                                </div>
+
                                 <button className="App-download button" onClick={ this.downloadAll }>Download all</button>
                             </div>
                             <div className="App-countries">
@@ -56,6 +61,7 @@ class App extends Component {
                                             <Country
                                                 key={country.country_code}
                                                 countryInfo={country}
+                                                predefinedBounds={ this.getPredefinedBoundsForCountry(country.country_code) }
                                                 onSvgChanged={ this.handleSvgChanged }
                                                 ></Country>
                                         )
@@ -107,6 +113,19 @@ class App extends Component {
         this.setState({
             countries: [],
         });
+    }
+
+    handleBoundsJsonLoad(bounds) {
+        this.setState({
+            predefinedBounds: bounds,
+        });
+    }
+
+    getPredefinedBoundsForCountry(countryCode) {
+        if(this.state.predefinedBounds && this.state.predefinedBounds[countryCode]) {
+            return this.state.predefinedBounds[countryCode].viewBox;
+        }
+        return null;
     }
 
 }

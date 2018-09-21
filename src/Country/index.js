@@ -24,6 +24,15 @@ class Country extends Component {
         };
     }
 
+    static getDerivedStateFromProps(props, state) {
+        if(props.predefinedBounds && state.limitedViewBox && (props.predefinedBounds.toString() !== state.limitedViewBox.toString())) {
+            return {
+                limitedViewBox: props.predefinedBounds,
+            };
+        }
+        return {};
+    }
+
     render() {
         return (
             <div className='Country'>
@@ -45,10 +54,10 @@ class Country extends Component {
                         this.state.limitedViewBox &&
                         <CountrySvg
                             countryInfo={this.props.countryInfo}
-                            latLonToProject={ {
+                            latLonToProject={ SHOW_TEST_LAT_LON? {
                                 lat: parseFloat(this.state.lat),
                                 lon: parseFloat(this.state.lon),
-                            } }
+                            } : null }
                             limitedViewBox={ this.state.limitedViewBox }
                             onChangeSvgDisplayed={ this.props.onSvgChanged }
                         />
@@ -101,6 +110,7 @@ class Country extends Component {
 
 Country.propTypes = {
     countryInfo: PropTypes.object.isRequired,
+    predefinedBounds: PropTypes.array,
     onSvgChanged: PropTypes.func,
 };
 
