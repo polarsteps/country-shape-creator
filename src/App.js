@@ -20,6 +20,7 @@ class App extends Component {
         this.filterChanged = this.filterChanged.bind(this);
         this.downloadAll = this.downloadAll.bind(this);
         this.handleSvgChanged = this.handleSvgChanged.bind(this);
+        this.reset = this.reset.bind(this);
     }
 
     render() {
@@ -29,20 +30,23 @@ class App extends Component {
                     <h1 className="App-title">Country Shape generator</h1>
                 </header>
                 <div className="App-intro">
-                    <GeoJsonLoader onLoad={ this.handleJsonLoad }/>
+                    {
+                        !this.state.countries.length &&
+                        <GeoJsonLoader onLoad={ this.handleJsonLoad }/>
+                    }
                     <div>
                     {
                         !!this.state.countries.length &&
                         <React.Fragment>
                             <div className="App-tools">
+                                <button className="App-reset button" onClick={ this.reset }>Reset and start again</button>
+
                                 <label>
                                     Filter by:
                                     <input value={ this.state.filter } onChange={ this.filterChanged } />
                                 </label>
 
-                                <div>
-                                    <button className="App-download" onClick={ this.downloadAll }>Download all</button>
-                                </div>
+                                <button className="App-download button" onClick={ this.downloadAll }>Download all</button>
                             </div>
                             <div className="App-countries">
                                 {
@@ -97,6 +101,12 @@ class App extends Component {
     handleSvgChanged(changeInfo) {
         this.allSvgs = this.allSvgs || {};
         this.allSvgs[changeInfo.countryCode] = changeInfo;
+    }
+
+    reset() {
+        this.setState({
+            countries: [],
+        });
     }
 
 }

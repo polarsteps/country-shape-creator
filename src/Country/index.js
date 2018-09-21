@@ -5,6 +5,8 @@ import { getLimitedViewBoxFromSelection } from '../utils/svgUtils';
 
 import './style.css';
 
+const SHOW_TEST_LAT_LON = false;
+
 class Country extends Component {
 
     constructor(props) {
@@ -32,10 +34,10 @@ class Country extends Component {
                     <CountrySvg
                         countryInfo={this.props.countryInfo}
                         allowSelectArea={true}
-                        latLonToProject={ {
+                        latLonToProject={ SHOW_TEST_LAT_LON? {
                             lat: parseFloat(this.state.lat),
                             lon: parseFloat(this.state.lon),
-                        } }
+                        } : null }
                         onInitSvgBoundaries={ this.handleInitSvgBoundaries }
                         onChangeAreaSelection={ this.handleChangeAreaSelection }
                     />
@@ -52,15 +54,20 @@ class Country extends Component {
                         />
                     }
                 </div>
-                <label>
-                    Lat:
-                    <input value={ this.state.lat } onChange={ this.updateLat } />
-                </label>
+                {
+                    SHOW_TEST_LAT_LON &&
+                    <div>
+                        <label>
+                            Lat:
+                            <input value={ this.state.lat } onChange={ this.updateLat } />
+                        </label>
 
-                <label>
-                    Lon:
-                    <input value={ this.state.lon } onChange={ this.updateLon } />
-                </label>
+                        <label>
+                            Lon:
+                            <input value={ this.state.lon } onChange={ this.updateLon } />
+                        </label>
+                    </div>
+                }
             </div>
         );
     }
