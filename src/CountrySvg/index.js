@@ -20,7 +20,7 @@ class CountrySvg extends Component {
 
         this.state = {
             loading: true,
-            svg: null
+            svg: null,
         };
         this.svgRef = React.createRef();
         this.initSvg = this.initSvg.bind(this);
@@ -156,9 +156,9 @@ class CountrySvg extends Component {
 
     getNewSvgElement() {
         const svg = geojson2svg()
-            .styles({ 'MultiPolygon' : { fill: 'black', stroke: 'none' } })
+            .styles({ MultiPolygon: { fill: '#000000', stroke: 'none' } })
             .projection((coord) => {
-                const projected = merc.fromLatLngToPoint({lat: coord[1], lng: coord[0]});
+                const projected = merc.fromLatLngToPoint({ lat: coord[1], lng: coord[0] });
                 return [projected.x, projected.y];
             })
             .data(this.props.countryInfo)
@@ -177,16 +177,16 @@ function getStateFromSvgAndProps(svgElement, props) {
     const lastUsedViewBox = makeSvgElementSquare(svgElement);
     return {
         svg: {
-            __html: svgElement.outerHTML
+            __html: svgElement.outerHTML,
         },
         svgElement,
-        lastUsedViewBox
+        lastUsedViewBox,
     };
 }
 
 function projectLatLonIntoArea(latlon, svgBoundaries, boundingBox) {
     const { minX, minY, maxX, maxY } = svgBoundaries;
-    const {x, y} = merc.fromLatLngToPoint({lat: latlon.lat, lng: latlon.lon});
+    const { x, y } = merc.fromLatLngToPoint({ lat: latlon.lat, lng: latlon.lon });
     const relativeX = getRelativePosition(x, minX, maxX);
     const relativeY = getRelativePosition(y, minY, maxY);
     return {

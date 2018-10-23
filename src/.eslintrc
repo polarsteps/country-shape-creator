@@ -5,6 +5,8 @@
         "node": true
     },
 
+    # "extends": "airbnb",
+
     "globals": {
         "React": true
     },
@@ -21,5 +23,31 @@
 
     "parserOptions": {
         "sourceType": "module",
+    },
+
+    "rules": {
+        "indent": ["error", 4, { "SwitchCase": 1 }],
+        "max-len": ["error", { "code": 200 }],
+        "keyword-spacing": "off",
+        "arrow-body-style": "off",
+        "space-infix-ops": "off",
+        "no-use-before-define": ["error", { "functions": false, "classes": false }],
+        "no-unused-vars": ["error", { "vars": "all", "args": "none" }],
+        "no-plusplus": "off",
+        "function-paren-newline": "off",
+        "prefer-destructuring": "off",
+        "no-mixed-operators": "off",
+        "no-param-reassign": "off",
+        "object-shorthand": ["error", "properties"],
+        "space-before-function-paren": ["error", "never"],
+        "prefer-template": "off",
+        "no-case-declarations": "off",
+        "operator-assignment": "off",
+        "no-useless-escape": "off",
+        "no-alert": "off",
+        "dot-notation": ["error", { "allowKeywords": true }],
+        "padded-blocks": "off",
+        "object-curly-newline": "off",
+        "no-underscore-dangle": "off"
     }
 }

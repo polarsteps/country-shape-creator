@@ -4,6 +4,9 @@ import Country from './Country';
 import JSZip from 'jszip';
 import { getCountryName, processCountries } from './utils/geojsonUtils';
 import { saveAs } from 'file-saver/FileSaver';
+import {
+    makeSVGExportable,
+} from './utils/svgUtils';
 import './App.css';
 
 class App extends Component {
@@ -72,7 +75,7 @@ class App extends Component {
                                             countryInfo={country}
                                             predefinedBounds={ this.getPredefinedBoundsForCountry(country.country_code) }
                                             onSvgChanged={ this.handleSvgChanged }
-                                            ></Country>
+                                        ></Country>
                                     )
                             }
                         </div>
@@ -85,7 +88,7 @@ class App extends Component {
     handleJsonLoad(geojson) {
         // TODO check geojson is correct
         this.setState({
-            countries: processCountries(geojson.features)//.filter(country => country.properties.NAME === 'Spain'),
+            countries: processCountries(geojson.features) // .filter(country => country.properties.NAME === 'Spain'),
         })
     }
 
@@ -96,7 +99,13 @@ class App extends Component {
     }
 
     downloadAll() {
-        const svgsInfo = Object.values(this.allSvgs);
+        const svgsInfo = Object.values(this.allSvgs)
+            .map((svgInfo) => {
+                return {
+                    ...svgInfo,
+                    svg: makeSVGExportable(svgInfo.svg),
+                };
+            });
         const boundsInfo = getBoundsInfo(svgsInfo);
         const zip = new JSZip();
         zip.file('bounds.json', boundsInfo);
