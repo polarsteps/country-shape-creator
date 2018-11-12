@@ -10,6 +10,13 @@ export const processCountries = (countries, maxCountries = -1) => {
         .map(country => Object.assign({}, country, { country_code: getCountryCode(country) }))
         .filter(country => country.country_code !== null)
         .filter(country => !shouldRemoveCountry(country));
+
+    // const notshown = countries
+    //     .map(country => Object.assign({}, country, { country_code: getCountryCode(country) }))
+    //     .filter(country => shouldRemoveCountry(country))
+    //     .map(country => country.properties);
+    // console.log(notshown);
+    // console.log(JSON.stringify(notshown, undefined, 2));
     let limited = unsorted;
     if(maxCountries > -1) {
         limited = limited.slice(0, maxCountries);
